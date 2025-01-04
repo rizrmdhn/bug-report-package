@@ -165,6 +165,38 @@ describe("BugReportClient", () => {
     );
   });
 
+  it("should get bug tags", async () => {
+    const mockResponse = {
+      meta: {
+        code: 200,
+        status: "success",
+        message: "List of available bug tags",
+      },
+      data: {
+        tags: ["UI", "FUNCTIONALITY", "PERFORMANCE"],
+      },
+    } satisfies ApiResponse<{ tags: string[] }>;
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => mockResponse,
+    } as Response);
+
+    const response = await client.getBugTags();
+
+    expect(response).toEqual(mockResponse);
+    expect(fetch).toHaveBeenCalledWith("https://api.test.com/bugs/tags", {
+      headers: {
+        "Content-Type": "application/json",
+        "X-App-Name": mockCredentials.appName,
+        "X-App-Key": mockCredentials.appKey,
+        Authorization: `Bearer ${mockCredentials.appSecret}`,
+      },
+      method: "GET",
+    });
+  });
+
   it("should handle failed bug report fetch", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
