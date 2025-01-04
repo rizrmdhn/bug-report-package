@@ -114,6 +114,27 @@ export class BugReportClient {
       throw new ApiBugReportError(errorData.meta);
     }
 
-    return response.json();
+    return response.json() as Promise<BugReportApiResponse>;
+  }
+
+  /**
+   * Retrieves a list of bug tags from the API.
+   * @returns A promise that resolves to an array of bug tags.
+   * @throws Will throw an error if the API response is not successful.
+   * @throws Will throw an error if the response data is invalid.
+   */
+  async getBugTags(): Promise<BugReportApiResponse> {
+    const response = await fetch(`${this.apiUrl}/bugs/tags`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json()) as ApiErrorResponse;
+      throw new ApiBugReportError(errorData.meta);
+    }
+
+    const data = (await response.json()) as BugReportApiResponse;
+    return data;
   }
 }
