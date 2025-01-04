@@ -25,7 +25,7 @@ export const BugReportSchema = z.object({
   description: z.string().min(1),
   severity: z.nativeEnum(BugSeverity),
   tags: z.array(BugTagSchema).min(1),
-  image: z.string().optional(), // Base64 encoded image
+  image: z.array(z.string()).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.date().optional(),
 });

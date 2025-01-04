@@ -26,7 +26,7 @@ describe("BugReportClient", () => {
     description: "This is a test bug report",
     severity: BugSeverity.HIGH,
     tags: ["UI", "FUNCTIONALITY"],
-    image: "base64-encoded-image",
+    image: ["base64-encoded-image"],
     metadata: {
       browser: "Chrome",
       version: "1.0.0",
