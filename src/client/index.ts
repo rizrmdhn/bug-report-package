@@ -91,6 +91,63 @@ export class BugReportClient {
   }
 
   /**
+   * Submits a bug report to the API.
+   * @param report - The bug report to be submitted.
+   * @param onProgress - A callback function to track the upload progress.
+   * @returns A promise that resolves to the response from the API.
+   * @throws Will throw an error if the bug report data is invalid.
+   * @throws Will throw an error if the API response is not successful.
+   */
+  async submitBugReportWithProgress(
+    report: BugReport,
+    onProgress: (progress: number) => void
+  ): Promise<BugReportResponse> {
+    try {
+      BugReportSchema.parse(report);
+    } catch (error) {
+      throw new Error(`Invalid bug report data: ${error}`);
+    }
+
+    const body = JSON.stringify({
+      ...report,
+      createdAt: report.createdAt ?? new Date(),
+    });
+
+    // Create a ReadableStream from the request body
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(body));
+        controller.close();
+      },
+    });
+
+    let loaded = 0;
+    const total = new TextEncoder().encode(body).length;
+
+    // create TransformStream to track upload progress
+    const progressStream = new TransformStream({
+      transform(chunk, controller) {
+        loaded += chunk.length;
+        onProgress((loaded / total) * 100);
+        controller.enqueue(chunk);
+      },
+    });
+
+    const response = await fetch(`${this.apiUrl}/bugs/reports`, {
+      method: "POST",
+      headers: this.headers,
+      body: stream.pipeThrough(progressStream),
+    });
+
+    if (!response.ok) {
+      const data = (await response.json()) as ApiErrorResponse;
+      throw new ApiBugReportError(data.meta);
+    }
+
+    return response.json();
+  }
+
+  /**
    * Retrieves a bug report by its ID.
    *
    * @param id - The ID of the bug report to retrieve.
