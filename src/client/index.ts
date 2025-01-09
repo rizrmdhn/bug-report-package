@@ -81,7 +81,7 @@ export class BugReportClient {
    *   description: "Bug Description"
    *   severity: "high",
    *   tags: ["ui", "critical"],
-   *   image: ["base64Image1", "base64Image2"],
+   *   file: ["base64Image1", "base64Image2"],
    *   createdAt: new Date() // Optional
    * };
    *
@@ -128,7 +128,7 @@ export class BugReportClient {
    *   description: "Bug Description"
    *   severity: "high",
    *   tags: ["ui", "critical"],
-   *   image: [base64Image1, base64Image2],
+   *   file: [base64Image1, base64Image2],
    *   createdAt: new Date() // Optional
    * };
    *
@@ -190,7 +190,7 @@ export class BugReportClient {
   /**
    * Submits a bug report with associated file attachments to the API.
    *
-   * @param report - The bug report data including title, description, severity, tags and image files
+   * @param report - The bug report data including title, description, severity, tags and file files
    * @throws {Error} If the bug report data is invalid according to BugReportSchema
    * @throws {ApiBugReportError} If the API request fails
    * @returns {Promise<BugReportResponse>} A promise that resolves with the API response
@@ -202,7 +202,7 @@ export class BugReportClient {
    *   description: "Bug Description",
    *   severity: "high",
    *   tags: ["frontend", "ui"],
-   *   image: [file1, file2],
+   *   file: [file1, file2],
    *   createdAt: new Date() // Optional
    * };
    * const response = await client.submitBugReportWithFile(bugReport);
@@ -222,8 +222,8 @@ export class BugReportClient {
     formData.append("description", report.description);
     formData.append("severity", report.severity);
     formData.append("tags", JSON.stringify(report.tags));
-    report.image.forEach((file) => {
-      formData.append("image", file);
+    report.file.forEach((file) => {
+      formData.append("file", file);
     });
 
     const response = await fetch(`${this.apiUrl}/bugs/reports`, {
@@ -258,7 +258,7 @@ export class BugReportClient {
    *   description: "Bug Description",
    *   severity: "high",
    *   tags: ["ui", "critical"],
-   *   image: [file1, file2], // File objects
+   *   file: [file1, file2], // File objects
    *   createdAt: new Date() // Optional
    * };
    *
@@ -286,9 +286,9 @@ export class BugReportClient {
 
     // Calculate total size of files
     let totalSize = 0;
-    report.image.forEach((file) => {
+    report.file.forEach((file) => {
       totalSize += file.size;
-      formData.append("image", file);
+      formData.append("file", file);
     });
 
     // Create XMLHttpRequest to track upload progress

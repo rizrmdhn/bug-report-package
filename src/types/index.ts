@@ -25,7 +25,7 @@ export const BugReportSchema = z.object({
   description: z.string().min(1),
   severity: z.nativeEnum(BugSeverity),
   tags: z.array(BugTagSchema).min(1),
-  image: z.array(z.string()).optional(),
+  file: z.array(z.string()).optional(),
   createdAt: z.date().optional(),
 });
 
@@ -34,7 +34,7 @@ export const BugReportFileSchema = z.object({
   description: z.string().min(1),
   severity: z.nativeEnum(BugSeverity),
   tags: z.array(BugTagSchema).min(1),
-  image: z.array(
+  file: z.array(
     z
       .instanceof(File)
       .refine((file) =>
