@@ -10,7 +10,6 @@ import { ApiBugReportError, NotFoundBugReportError } from "../errors";
 
 export interface BugReportClientOptions {
   apiUrl: string;
-  appName: string;
   appKey: string;
   appSecret: string;
   headers?: Record<string, string>;
@@ -42,7 +41,7 @@ export class BugReportClient {
       throw new Error("API URL is required");
     }
 
-    if (!options.appName || !options.appKey || !options.appSecret) {
+    if (!options.appKey || !options.appSecret) {
       throw new Error(
         "App credentials (App Name, App Key, App Secret) are required"
       );
@@ -51,7 +50,6 @@ export class BugReportClient {
     this.apiUrl = options.apiUrl;
     this.headers = {
       "Content-Type": "application/json",
-      "X-App-Name": options.appName,
       "X-App-Key": options.appKey,
       Authorization: `Bearer ${options.appSecret}`,
       ...(options.headers ?? {}),
