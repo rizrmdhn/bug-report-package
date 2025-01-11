@@ -1,3 +1,4 @@
+import fetch from "cross-fetch";
 import {
   BugReport,
   BugReportSchema,
