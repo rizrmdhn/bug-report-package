@@ -26,7 +26,7 @@ describe("BugReportClient", () => {
     title: "Test Bug",
     description: "This is a test bug report",
     severity: BugSeverity.HIGH,
-    tags: "UI",
+    tags: ["UI", "FUNCTIONALITY"],
     file: ["base64-encoded-image"],
   } satisfies BugReport;
 
