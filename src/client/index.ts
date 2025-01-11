@@ -228,7 +228,10 @@ export class BugReportClient {
 
     const response = await fetch(`${this.apiUrl}/api/bugs/reports`, {
       method: "POST",
-      headers: this.headers,
+      headers: {
+        ...this.headers,
+        "Content-Type": "multipart/form-data",
+      },
       body: formData,
     });
 
@@ -320,6 +323,8 @@ export class BugReportClient {
       });
 
       xhr.open("POST", `${this.apiUrl}/api/bugs/reports`);
+
+      this.headers["Content-Type"] = "multipart/form-data";
 
       // Add headers
       Object.entries(this.headers).forEach(([key, value]) => {
