@@ -52,6 +52,12 @@ export type BugReport = z.infer<typeof BugReportSchema>;
 
 export type BugReportFile = z.infer<typeof BugReportFileSchema>;
 
+export const AppCredentialsSchema = z.object({
+  appUrl: z.string().url(),
+  appKey: z.string().min(5),
+  appSecret: z.string().min(5),
+});
+
 export interface ApiResponse<T> {
   meta: {
     code: number;

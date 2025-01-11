@@ -7,8 +7,13 @@ import {
   ApiErrorResponse,
   BugReportFile,
   BugReportFileSchema,
+  AppCredentialsSchema,
 } from "../types";
-import { ApiBugReportError, NotFoundBugReportError } from "../errors";
+import {
+  ApiBugReportError,
+  AppCredentialTypeError,
+  NotFoundBugReportError,
+} from "../errors";
 
 export interface BugReportClientOptions {
   apiUrl: string;
@@ -47,13 +52,15 @@ export class BugReportClient {
    * ```
    */
   constructor(options: BugReportClientOptions) {
-    if (!options.apiUrl) {
-      throw new Error("API URL is required");
-    }
-
-    if (!options.appKey || !options.appSecret) {
-      throw new Error(
-        "App credentials (App Name, App Key, App Secret) are required"
+    try {
+      AppCredentialsSchema.parse({
+        appUrl: options.apiUrl,
+        appKey: options.appKey,
+        appSecret: options.appSecret,
+      });
+    } catch (error) {
+      throw new AppCredentialTypeError(
+        `Failed to initialize BugReportClient: ${error}`
       );
     }
 
@@ -363,7 +370,10 @@ export class BugReportClient {
   async getBugReport(id: string): Promise<BugReportApiResponse> {
     const response = await fetch(`${this.apiUrl}/api/bugs/${id}`, {
       method: "GET",
-      headers: this.headers,
+      headers: {
+        ...this.headers,
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {
@@ -393,7 +403,10 @@ export class BugReportClient {
   async getBugTags(): Promise<BugReportApiResponse> {
     const response = await fetch(`${this.apiUrl}/api/bugs/tags`, {
       method: "GET",
-      headers: this.headers,
+      headers: {
+        ...this.headers,
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {
