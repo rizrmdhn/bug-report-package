@@ -153,38 +153,48 @@ export class BugReportClient {
       createdAt: report.createdAt ?? new Date(),
     });
 
-    // Create a ReadableStream from the request body
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(new TextEncoder().encode(body));
-        controller.close();
-      },
+    // Create XMLHttpRequest for progress tracking
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          onProgress(percentComplete);
+        }
+      };
+
+      xhr.onload = async () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } catch (error) {
+            reject(new Error("Failed to parse server response"));
+          }
+        } else {
+          try {
+            const errorData = JSON.parse(xhr.responseText) as ApiErrorResponse;
+            reject(new ApiBugReportError(errorData.meta));
+          } catch (error) {
+            reject(new Error(`Server returned status ${xhr.status}`));
+          }
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error("Network request failed"));
+      };
+
+      xhr.open("POST", `${this.apiUrl}/api/bugs/reports`);
+
+      // Add headers
+      Object.entries(this.headers).forEach(([key, value]) => {
+        xhr.setRequestHeader(key, value);
+      });
+
+      xhr.send(body);
     });
-
-    let loaded = 0;
-    const total = new TextEncoder().encode(body).length;
-
-    // create TransformStream to track upload progress
-    const progressStream = new TransformStream({
-      transform(chunk, controller) {
-        loaded += chunk.length;
-        onProgress((loaded / total) * 100);
-        controller.enqueue(chunk);
-      },
-    });
-
-    const response = await fetch(`${this.apiUrl}/api/bugs/reports`, {
-      method: "POST",
-      headers: this.headers,
-      body: stream.pipeThrough(progressStream),
-    });
-
-    if (!response.ok) {
-      const data = (await response.json()) as ApiErrorResponse;
-      throw new ApiBugReportError(data.meta);
-    }
-
-    return response.json();
   }
 
   /**
