@@ -95,7 +95,7 @@ export class BugReportClient {
       throw new Error(`Invalid bug report data: ${error}`);
     }
 
-    const response = await fetch(`${this.apiUrl}/bugs/reports`, {
+    const response = await fetch(`${this.apiUrl}/api/bugs/reports`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify({
@@ -173,7 +173,7 @@ export class BugReportClient {
       },
     });
 
-    const response = await fetch(`${this.apiUrl}/bugs/reports`, {
+    const response = await fetch(`${this.apiUrl}/api/bugs/reports`, {
       method: "POST",
       headers: this.headers,
       body: stream.pipeThrough(progressStream),
@@ -226,7 +226,7 @@ export class BugReportClient {
       formData.append("file", file);
     });
 
-    const response = await fetch(`${this.apiUrl}/bugs/reports`, {
+    const response = await fetch(`${this.apiUrl}/api/bugs/reports`, {
       method: "POST",
       headers: this.headers,
       body: formData,
@@ -319,7 +319,7 @@ export class BugReportClient {
         reject(new Error("Network error occurred"));
       });
 
-      xhr.open("POST", `${this.apiUrl}/bugs/reports`);
+      xhr.open("POST", `${this.apiUrl}/api/bugs/reports`);
 
       // Add headers
       Object.entries(this.headers).forEach(([key, value]) => {
@@ -344,7 +344,7 @@ export class BugReportClient {
    * ```
    */
   async getBugReport(id: string): Promise<BugReportApiResponse> {
-    const response = await fetch(`${this.apiUrl}/bugs/${id}`, {
+    const response = await fetch(`${this.apiUrl}/api/bugs/${id}`, {
       method: "GET",
       headers: this.headers,
     });
@@ -374,7 +374,7 @@ export class BugReportClient {
    * ```
    */
   async getBugTags(): Promise<BugReportApiResponse> {
-    const response = await fetch(`${this.apiUrl}/bugs/tags`, {
+    const response = await fetch(`${this.apiUrl}/api/bugs/tags`, {
       method: "GET",
       headers: this.headers,
     });
