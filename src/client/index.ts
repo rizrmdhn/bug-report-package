@@ -59,7 +59,6 @@ export class BugReportClient {
 
     this.apiUrl = options.apiUrl;
     this.headers = {
-      "Content-Type": "application/json",
       "X-App-Key": options.appKey,
       Authorization: `Bearer ${options.appSecret}`,
       ...(options.headers ?? {}),
@@ -97,7 +96,10 @@ export class BugReportClient {
 
     const response = await fetch(`${this.apiUrl}/api/bugs/reports`, {
       method: "POST",
-      headers: this.headers,
+      headers: {
+        ...this.headers,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         ...report,
         createdAt: report.createdAt ?? new Date(),
@@ -189,7 +191,10 @@ export class BugReportClient {
       xhr.open("POST", `${this.apiUrl}/api/bugs/reports`);
 
       // Add headers
-      Object.entries(this.headers).forEach(([key, value]) => {
+      Object.entries({
+        ...this.headers,
+        "Content-Type": "application/json",
+      }).forEach(([key, value]) => {
         xhr.setRequestHeader(key, value);
       });
 
