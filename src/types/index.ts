@@ -81,4 +81,4 @@ export interface BugReportResponse {
   createdAt: string;
 }
 
-export type BugReportApiResponse = ApiResponse<BugReportResponse>;
+export type BugReportApiResponse = ApiResponse<BugReportResponse[]>;
