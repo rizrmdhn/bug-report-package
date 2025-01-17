@@ -7,6 +7,7 @@ import {
   BugReportFile,
   BugReportFileSchema,
   AppCredentialsSchema,
+  ApiResponse,
 } from "../types";
 import {
   ApiBugReportError,
@@ -399,7 +400,7 @@ export class BugReportClient {
    * const bugReports = await client.getBugReports();
    * ```
    */
-  async getBugTags(): Promise<string[]> {
+  async getBugTags(): Promise<ApiResponse<string[]>> {
     const response = await fetch(`${this.apiUrl}/api/bugs/tags`, {
       method: "GET",
       headers: {
@@ -413,7 +414,7 @@ export class BugReportClient {
       throw new ApiBugReportError(errorData.meta);
     }
 
-    const data = (await response.json()) as string[];
+    const data = (await response.json()) as ApiResponse<string[]>;
     return data;
   }
 }
