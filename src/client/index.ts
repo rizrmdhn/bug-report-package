@@ -400,7 +400,7 @@ export class BugReportClient {
    * const bugReports = await client.getBugReports();
    * ```
    */
-  async getBugTags(): Promise<BugReportApiResponse> {
+  async getBugTags(): Promise<string[]> {
     const response = await fetch(`${this.apiUrl}/api/bugs/tags`, {
       method: "GET",
       headers: {
@@ -414,7 +414,7 @@ export class BugReportClient {
       throw new ApiBugReportError(errorData.meta);
     }
 
-    const data = (await response.json()) as BugReportApiResponse;
+    const data = (await response.json()) as string[];
     return data;
   }
 }
