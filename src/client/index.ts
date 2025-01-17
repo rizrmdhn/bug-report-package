@@ -417,4 +417,35 @@ export class BugReportClient {
     const data = (await response.json()) as ApiResponse<string[]>;
     return data;
   }
+
+  /**
+   * Retrieves the list of available bug severity levels from the API.
+   *
+   * @returns A Promise that resolves to an ApiResponse containing an array of severity levels as strings.
+   * @throws {ApiBugReportError} When the API request fails or returns an error response.
+   *
+   * @example
+   * ```typescript
+   * const bugClient = new BugReportClient();
+   * const severities = await bugClient.getBugSeverity();
+   * // severities.data = ["Low", "Medium", "High", "Critical"]
+   * ```
+   */
+  async getBugSeverity(): Promise<ApiResponse<string[]>> {
+    const response = await fetch(`${this.apiUrl}/api/bugs/severities`, {
+      method: "GET",
+      headers: {
+        ...this.headers,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json()) as ApiErrorResponse;
+      throw new ApiBugReportError(errorData.meta);
+    }
+
+    const data = (await response.json()) as ApiResponse<string[]>;
+    return data;
+  }
 }
