@@ -7,6 +7,7 @@ import {
   BugSeverity,
 } from "../types";
 import fetch from "cross-fetch";
+import { AppCredentialTypeError } from "../errors";
 
 vi.mock("cross-fetch", () => ({
   default: vi.fn(),
@@ -26,11 +27,7 @@ describe("BugReportClient", () => {
     description: "This is a test bug report",
     severity: BugSeverity.HIGH,
     tags: ["UI", "FUNCTIONALITY"],
-    image: ["base64-encoded-image"],
-    metadata: {
-      browser: "Chrome",
-      version: "1.0.0",
-    },
+    file: ["base64-encoded-image"],
   } satisfies BugReport;
 
   beforeEach(() => {
@@ -63,16 +60,18 @@ describe("BugReportClient", () => {
     const response = await client.submitBugReport(mockBugReport);
 
     expect(response).toEqual(mockResponse);
-    expect(fetch).toHaveBeenCalledWith("https://api.test.com/bugs/reports", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-App-Name": mockCredentials.appName,
-        "X-App-Key": mockCredentials.appKey,
-        Authorization: `Bearer ${mockCredentials.appSecret}`,
-      },
-      body: expect.any(String),
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.test.com/api/bugs/reports",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-App-Key": mockCredentials.appKey,
+          Authorization: `Bearer ${mockCredentials.appSecret}`,
+        },
+        body: expect.any(String),
+      }
+    );
 
     // Verify the bug report data in the request body
     const requestBody = JSON.parse(
@@ -86,31 +85,28 @@ describe("BugReportClient", () => {
       () =>
         new BugReportClient({
           apiUrl: "https://api.test.com",
-          appName: "",
           appKey: "test",
           appSecret: "test",
         })
-    ).toThrow("App credentials");
+    ).toThrow(AppCredentialTypeError);
 
     expect(
       () =>
         new BugReportClient({
           apiUrl: "https://api.test.com",
-          appName: "test",
           appKey: "",
           appSecret: "test",
         })
-    ).toThrow("App credentials");
+    ).toThrow(AppCredentialTypeError);
 
     expect(
       () =>
         new BugReportClient({
           apiUrl: "https://api.test.com",
-          appName: "test",
           appKey: "test",
           appSecret: "",
         })
-    ).toThrow("App credentials");
+    ).toThrow(AppCredentialTypeError);
   });
 
   it("should get bug report with correct headers", async () => {
@@ -136,12 +132,11 @@ describe("BugReportClient", () => {
     const response = await client.getBugReport("123");
 
     expect(response).toEqual(mockResponse);
-    expect(fetch).toHaveBeenCalledWith("https://api.test.com/bugs/123", {
+    expect(fetch).toHaveBeenCalledWith("https://api.test.com/api/bugs/123", {
       headers: {
-        "Content-Type": "application/json",
-        "X-App-Name": mockCredentials.appName,
-        "X-App-Key": mockCredentials.appKey,
         Authorization: `Bearer ${mockCredentials.appSecret}`,
+        "Content-Type": "application/json",
+        "X-App-Key": mockCredentials.appKey,
       },
       method: "GET",
     });
@@ -163,6 +158,38 @@ describe("BugReportClient", () => {
     await expect(client.getBugReport("123")).rejects.toThrow(
       "API Error [500]: Internal Server Error"
     );
+  });
+
+  it("should get bug tags", async () => {
+    const mockResponse = {
+      meta: {
+        code: 200,
+        status: "success",
+        message: "List of available bug tags",
+      },
+      data: {
+        tags: ["UI", "FUNCTIONALITY", "PERFORMANCE"],
+      },
+    } satisfies ApiResponse<{ tags: string[] }>;
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => mockResponse,
+    } as Response);
+
+    const response = await client.getBugTags();
+
+    expect(response).toEqual(mockResponse);
+    expect(fetch).toHaveBeenCalledWith("https://api.test.com/api/bugs/tags", {
+      headers: {
+        "Content-Type": "application/json",
+
+        "X-App-Key": mockCredentials.appKey,
+        Authorization: `Bearer ${mockCredentials.appSecret}`,
+      },
+      method: "GET",
+    });
   });
 
   it("should handle failed bug report fetch", async () => {
@@ -209,7 +236,7 @@ describe("BugReportClient", () => {
       expect.objectContaining({
         headers: expect.objectContaining({
           "Content-Type": "application/json",
-          "X-App-Name": mockCredentials.appName,
+
           "X-App-Key": mockCredentials.appKey,
           Authorization: `Bearer ${mockCredentials.appSecret}`,
           "X-Custom-Header": "custom-value",

@@ -35,3 +35,10 @@ export class NotFoundBugReportError extends BugReportClientError {
     this.name = "NotFoundBugReportError";
   }
 }
+
+export class AppCredentialTypeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AppCredentialTypeError";
+  }
+}
